@@ -1,11 +1,11 @@
 package com.mdc.mim.endecoder;
 
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.function.Supplier;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.Input;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -13,7 +13,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 /**
  * Use Kryo to convert object to byte array
  */
-public class KryoContentDecoder extends MessageToMessageDecoder<Object> {
+public class KryoContentDecoder extends MessageToMessageDecoder<byte[]> {
 
     final ThreadLocal<Kryo> serializerThreadLocal;
 
@@ -22,13 +22,23 @@ public class KryoContentDecoder extends MessageToMessageDecoder<Object> {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, byte[] msg, List<Object> out) throws Exception {
         var serializer = serializerThreadLocal.get();
-        try (var bos = new ByteArrayOutputStream()) {
-            var output = new Output(bos);
-            serializer.writeObject(output, msg);
-            var byteArray = output.toBytes();
-            out.add(byteArray);
+        Input input = null;
+        try (var ios = new ByteArrayInputStream(msg)) {
+            input = new Input(ios);
+            int classId = input.readInt();
+            var registration = serializerThreadLocal.get().getRegistration(classId);
+            if (registration == null) {
+                throw new IllegalStateException("class version is not registered");
+            }
+            @SuppressWarnings("unchecked")
+            var object = serializer.readObject(input, registration.getType());
+            out.add(object);
+        } finally {
+            if (input != null) {
+                input.close();
+            }
         }
     }
 

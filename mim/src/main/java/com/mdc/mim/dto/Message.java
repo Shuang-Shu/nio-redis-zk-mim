@@ -1,4 +1,4 @@
-package com.mdc.mim.entity;
+package com.mdc.mim.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

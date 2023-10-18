@@ -6,17 +6,17 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.mdc.mim.dto.Message.LoginRequest;
+import com.mdc.mim.dto.Message.LoginResponse;
+import com.mdc.mim.dto.Message.LogoutRequest;
+import com.mdc.mim.dto.Message.LogoutResponse;
+import com.mdc.mim.dto.Message.MessageRequest;
+import com.mdc.mim.dto.Message.MessageResponse;
 import com.mdc.mim.endecoder.Common;
 import com.mdc.mim.endecoder.KryoContentDecoder;
 import com.mdc.mim.endecoder.KryoContentEncoder;
 import com.mdc.mim.endecoder.MIMByteDecoder;
 import com.mdc.mim.endecoder.MIMByteEncoder;
-import com.mdc.mim.entity.Message.LoginRequest;
-import com.mdc.mim.entity.Message.LoginResponse;
-import com.mdc.mim.entity.Message.LogoutRequest;
-import com.mdc.mim.entity.Message.LogoutResponse;
-import com.mdc.mim.entity.Message.MessageRequest;
-import com.mdc.mim.entity.Message.MessageResponse;
 import com.mdc.mim.utils.ClassIdUtils;
 
 import io.netty.buffer.ByteBuf;

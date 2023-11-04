@@ -1,5 +1,9 @@
 package com.mdc.mim;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -379,5 +383,67 @@ public class ZkTest {
         curatorCache.listenable().addListener(listener);
         curatorCache.start();
         modifyZk(client);
+    }
+
+    static class ZKLock implements Lock {
+
+        CuratorFramework client;
+        String lockName;
+        int lockCount; // 用于实现可重入锁
+        Thread currentThread; // 当前应用占用锁的线程，每个线程必须先获取本地的锁，才有资格竞争分布式锁
+
+        public ZKLock(CuratorFramework client, String lockName) throws Exception {
+            this.client = client;
+            this.lockName = lockName;
+            // 创建锁节点
+            if (null == client.checkExists().forPath(lockName)) {
+                client.create().creatingParentsIfNeeded().forPath(lockName);
+            }
+        }
+
+        @Override
+        public void lock() {
+            synchronized (this) {
+                if (lockCount == 0) {
+                    currentThread = Thread.currentThread(); // 线程被当前线程占据
+                } else {
+                    if (currentThread.equals(Thread.currentThread())) {
+                        return; // 可重入机制，由于lockCount>0，代表之前已经获得过分布式锁，直接重入即可
+                    }
+                }
+                if (tryLock()) {
+
+                }
+            }
+        }
+
+        @Override
+        public void lockInterruptibly() throws InterruptedException {
+        }
+
+        @Override
+        public boolean tryLock() {
+            return false;
+        }
+
+        @Override
+        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public void unlock() {
+        }
+
+        @Override
+        public Condition newCondition() {
+            return null;
+        }
+
+    }
+
+    @Test
+    public void testZkLock() {
+
     }
 }

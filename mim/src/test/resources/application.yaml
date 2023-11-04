@@ -1,0 +1,14 @@
+spring:
+  cache:
+    type: REDIS
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    jedis:
+      pool:
+        enabled: true
+        minIdle: 2
+        maxIdle: 2
+        maxWait: 2
+        maxActive: 2

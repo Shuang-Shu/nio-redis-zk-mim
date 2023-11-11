@@ -1,4 +1,4 @@
-package com.mdc.mim.utils;
+package com.mdc.mim.common.utils;
 
 public class JwtUtils {
     // 混淆字符串

@@ -27,7 +27,7 @@ public class KryoContentDecoder extends MessageToMessageDecoder<byte[]> {
         Input input = null;
         try (var ios = new ByteArrayInputStream(msg)) {
             input = new Input(ios);
-            int classId = input.readInt();
+            int classId = input.readInt(); // 1字节版本ID+3字节全类名Hash
             var registration = serializerThreadLocal.get().getRegistration(classId);
             if (registration == null) {
                 throw new IllegalStateException("class version is not registered");

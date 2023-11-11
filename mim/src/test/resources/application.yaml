@@ -12,3 +12,7 @@ spring:
         maxIdle: 2
         maxWait: 2
         maxActive: 2
+
+server:
+  host: localhost
+  port: 8080

@@ -8,6 +8,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
+/*
+ * 将字节流转换为byte[]对象
+ */
 public class MIMByteDecoder extends ByteToMessageDecoder {
     static final ThreadLocal<Kryo> kryo = ThreadLocal.withInitial(() -> new Kryo());
 
@@ -27,7 +30,7 @@ public class MIMByteDecoder extends ByteToMessageDecoder {
             return;
         }
         var version = in.readShort();
-        if (version > Common.VERSION) {
+        if (version > Common.APP_VERSION) {
             in.resetReaderIndex();
             return;
         }

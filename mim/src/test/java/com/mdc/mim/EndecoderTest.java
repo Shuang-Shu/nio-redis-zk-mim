@@ -6,18 +6,19 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.mdc.mim.dto.Message.LoginRequest;
-import com.mdc.mim.dto.Message.LoginResponse;
-import com.mdc.mim.dto.Message.LogoutRequest;
-import com.mdc.mim.dto.Message.LogoutResponse;
-import com.mdc.mim.dto.Message.MessageRequest;
-import com.mdc.mim.dto.Message.MessageResponse;
+import com.mdc.mim.common.dto.Message.LoginRequest;
+import com.mdc.mim.common.dto.Message.LoginResponse;
+import com.mdc.mim.common.dto.Message.LogoutRequest;
+import com.mdc.mim.common.dto.Message.LogoutResponse;
+import com.mdc.mim.common.dto.Message.MessageRequest;
+import com.mdc.mim.common.dto.Message.MessageResponse;
+import com.mdc.mim.common.entity.Platform;
+import com.mdc.mim.common.utils.ClassIdUtils;
 import com.mdc.mim.endecoder.Common;
 import com.mdc.mim.endecoder.KryoContentDecoder;
 import com.mdc.mim.endecoder.KryoContentEncoder;
 import com.mdc.mim.endecoder.MIMByteDecoder;
 import com.mdc.mim.endecoder.MIMByteEncoder;
-import com.mdc.mim.utils.ClassIdUtils;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -65,9 +66,8 @@ public class EndecoderTest {
         var byteDecoder = new MIMByteDecoder();
         Supplier<Kryo> kryoSupplier = () -> {
             var kryo = new Kryo();
-            // kryo.register(Message.class);
             for (var clazz : classes) {
-                kryo.register(clazz, ClassIdUtils.generateClassId(clazz, Common.VERSION));
+                kryo.register(clazz, ClassIdUtils.generateClassId(clazz, Common.APP_VERSION));
             }
             return kryo;
         };
@@ -98,7 +98,8 @@ public class EndecoderTest {
     @Test
     public void testLoginTransport() {
         initialChannelWith(basicBuildHandlers(new Class<?>[] { LoginRequest.class, LoginResponse.class }));
-        var req = LoginRequest.builder().id(123L).uid("shuangshu").appVersion("0.0.1-beta").deviceId("ios").platform(2)
+        var req = LoginRequest.builder().id(123L).uid("shuangshu").appVersion(Common.APP_VERSION).deviceId("ios")
+                .platform(Platform.LINUX)
                 .build();
         doTestPipeline(channel, req);
         var resp = LoginResponse.builder().code(1).id(123L).info("success").expose(9).build();
@@ -112,11 +113,6 @@ public class EndecoderTest {
         var resp = LogoutResponse.builder().id(321L).build();
         doTestPipeline(channel, req);
         doTestPipeline(channel, resp);
-    }
-
-    @Test
-    public void testKeepAliveTransport() {
-        // TODO
     }
 
     @Test

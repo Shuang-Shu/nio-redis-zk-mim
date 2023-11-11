@@ -10,7 +10,7 @@ public class MIMByteEncoder extends MessageToByteEncoder<byte[]> {
     protected void encode(ChannelHandlerContext ctx, byte[] msg, ByteBuf out) throws Exception {
         var length = msg.length;
         out.writeShort(Common.MAGIC_NUMBER);
-        out.writeShort(Common.VERSION);
+        out.writeShort(Common.APP_VERSION);
         out.writeInt(length);
         out.writeBytes(msg);
     }

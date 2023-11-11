@@ -1,4 +1,4 @@
-package com.mdc.mim.utils;
+package com.mdc.mim.common.utils;
 
 import java.util.HashMap;
 import java.util.Map;

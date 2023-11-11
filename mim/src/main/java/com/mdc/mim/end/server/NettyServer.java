@@ -4,7 +4,6 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import com.mdc.mim.end.server.handler.LoginInboundHandler;
-import com.mdc.mim.end.server.handler.MessageInboundHandler;
 import com.mdc.mim.endecoder.Common;
 import com.mdc.mim.endecoder.KryoContentDecoder;
 import com.mdc.mim.endecoder.KryoContentEncoder;
@@ -18,10 +17,12 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 
-public class MIMServer implements Closeable {
+@Slf4j
+public class NettyServer implements Closeable {
 
-    public MIMServer(String host, int port) {
+    public NettyServer(String host, int port) {
         this.host = host;
         this.port = port;
     }
@@ -46,8 +47,6 @@ public class MIMServer implements Closeable {
                     ch.pipeline().addLast(new MIMByteDecoder());
                     ch.pipeline().addLast(new KryoContentDecoder(Common.supplier));
                     ch.pipeline().addLast(new LoginInboundHandler());
-                    ch.pipeline().addLast(new LoginInboundHandler());
-                    ch.pipeline().addLast(new MessageInboundHandler());
                     // outbound
                     ch.pipeline().addLast(new MIMByteEncoder());
                     ch.pipeline().addLast(new KryoContentEncoder(Common.supplier));
@@ -56,7 +55,7 @@ public class MIMServer implements Closeable {
             var channelFuture = b.bind(this.host, this.port).sync();
             channelFuture.channel().closeFuture().sync(); // 等待关闭的同步事件
         } catch (Exception e) {
-
+            log.error("exception: {}", e);
         } finally {
             bossLoopGroup.shutdownGracefully();
             workerLoopGroup.shutdownGracefully();
@@ -66,8 +65,5 @@ public class MIMServer implements Closeable {
 
     @Override
     public void close() throws IOException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'close'");
     }
-
 }

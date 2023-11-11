@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-import com.mdc.mim.utils.ClassIdUtils;
+import com.mdc.mim.common.utils.ClassIdUtils;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
@@ -27,7 +27,7 @@ public class KryoContentEncoder extends MessageToMessageEncoder<Object> {
         Output output = null;
         try (var bos = new ByteArrayOutputStream()) {
             output = new Output(bos);
-            int classId = ClassIdUtils.generateClassId(msg.getClass(), Common.VERSION);
+            int classId = ClassIdUtils.generateClassId(msg.getClass(), Common.APP_VERSION);
             // 写入注册id
             output.writeInt(classId);
             serializerThreadLocal.get().writeObject(output, msg);

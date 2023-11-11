@@ -1,13 +1,15 @@
-package com.mdc.mim.dto;
+package com.mdc.mim.common.dto;
+
+import com.mdc.mim.common.entity.Platform;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 public class Message {
     MessageTypeEnum messageType; // 消息类型
-    long seqNo;
     String sessionId;
 
     // 登入
@@ -34,8 +36,8 @@ public class Message {
         String uid;
         String deviceId;
         String token;
-        int platform;
-        String appVersion;
+        Platform platform;
+        int appVersion;
     }
 
     @Data
@@ -55,7 +57,6 @@ public class Message {
     @AllArgsConstructor
     public static class LogoutRequest {
         long id;
-
     }
 
     @Data
@@ -117,6 +118,7 @@ public class Message {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MessageNotification {
+        long id;
         int messagType;
         boolean sender;
         String json;

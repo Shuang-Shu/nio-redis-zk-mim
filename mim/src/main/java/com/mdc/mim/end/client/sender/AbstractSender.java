@@ -9,9 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Data
-public abstract class BasicSender {
+public abstract class AbstractSender {
     ClientSession clientSession;
 
+    /*
+     * 发送消息
+     */
     public void sendMessage(Object msg) {
         if (null == getClientSession() || !getClientSession().isConnected()) {
             log.info("connection is not established yet!");
@@ -26,6 +29,7 @@ public abstract class BasicSender {
                         if (future.isSuccess()) {
                             sendSucceed(msg);
                         } else {
+                            log.error(future.cause().getMessage());
                             sendFailed(msg);
                         }
                     }
@@ -33,10 +37,10 @@ public abstract class BasicSender {
     }
 
     protected void sendSucceed(Object msg) {
-        log.info("send message success: {}", msg);
+        log.info("send message successed: {}", msg);
     }
 
     protected void sendFailed(Object msg) {
-        log.info("send message fail: {}", msg);
+        log.info("send message failed: {}", msg);
     }
 }

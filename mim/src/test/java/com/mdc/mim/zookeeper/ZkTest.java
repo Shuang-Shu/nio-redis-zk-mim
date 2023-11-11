@@ -1,4 +1,4 @@
-package com.mdc.mim;
+package com.mdc.mim.zookeeper;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -412,7 +412,7 @@ public class ZkTest {
                     }
                 }
                 if (tryLock()) {
-
+                    
                 }
             }
         }
@@ -439,11 +439,6 @@ public class ZkTest {
         public Condition newCondition() {
             return null;
         }
-
-    }
-
-    @Test
-    public void testZkLock() {
 
     }
 }

@@ -1,4 +1,4 @@
-package com.mdc.mim;
+package com.mdc.mim.redis;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

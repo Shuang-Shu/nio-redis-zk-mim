@@ -1,11 +1,10 @@
 package com.mdc.mim;
 
 import java.io.Serializable;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-import com.esotericsoftware.kryo.Kryo;
+import com.mdc.mim.common.Common;
 import com.mdc.mim.common.dto.Message.LoginRequest;
 import com.mdc.mim.common.dto.Message.LoginResponse;
 import com.mdc.mim.common.dto.Message.LogoutRequest;
@@ -13,8 +12,6 @@ import com.mdc.mim.common.dto.Message.LogoutResponse;
 import com.mdc.mim.common.dto.Message.MessageRequest;
 import com.mdc.mim.common.dto.Message.MessageResponse;
 import com.mdc.mim.common.entity.Platform;
-import com.mdc.mim.common.utils.ClassIdUtils;
-import com.mdc.mim.endecoder.Common;
 import com.mdc.mim.endecoder.KryoContentDecoder;
 import com.mdc.mim.endecoder.KryoContentEncoder;
 import com.mdc.mim.endecoder.MIMByteDecoder;
@@ -61,23 +58,25 @@ public class EndecoderTest {
         channel = new EmbeddedChannel(initializer);
     }
 
-    ChannelHandler[] basicBuildHandlers(final Class<?>[] classes) {
+    static ChannelHandler[] channelHandlers;
+
+    static {
         var byteEncoder = new MIMByteEncoder();
         var byteDecoder = new MIMByteDecoder();
-        Supplier<Kryo> kryoSupplier = () -> {
-            var kryo = new Kryo();
-            for (var clazz : classes) {
-                kryo.register(clazz, ClassIdUtils.generateClassId(clazz, Common.APP_VERSION));
-            }
-            return kryo;
-        };
+        var kryoSupplier = Common.supplier;
         var kryoContentEncoder = new KryoContentEncoder(kryoSupplier);
         var kryoContentDecoder = new KryoContentDecoder(kryoSupplier);
-        return new ChannelHandler[] {
+        channelHandlers = new ChannelHandler[] {
                 byteDecoder, kryoContentDecoder, byteEncoder, kryoContentEncoder
         };
     }
 
+    /**
+     * 先将对象写入输出端，再将结果从输入端写入，检查解码结果与原始结果是否一致
+     * 
+     * @param channel
+     * @param msg
+     */
     public void doTestPipeline(EmbeddedChannel channel, Object msg) {
         // 输出
         channel.writeOutbound(msg);
@@ -91,13 +90,13 @@ public class EndecoderTest {
 
     @Test
     public void testKryoDecoder() {
-        initialChannelWith(basicBuildHandlers(new Class[] { Message.class }));
+        initialChannelWith(channelHandlers);
         doTestPipeline(channel, message);
     }
 
     @Test
     public void testLoginTransport() {
-        initialChannelWith(basicBuildHandlers(new Class<?>[] { LoginRequest.class, LoginResponse.class }));
+        initialChannelWith(channelHandlers);
         var req = LoginRequest.builder().id(123L).uid("shuangshu").appVersion(Common.APP_VERSION).deviceId("ios")
                 .platform(Platform.LINUX)
                 .build();
@@ -108,7 +107,7 @@ public class EndecoderTest {
 
     @Test
     public void testLogoutTransport() {
-        initialChannelWith(basicBuildHandlers(new Class<?>[] { LogoutRequest.class, LogoutResponse.class }));
+        initialChannelWith(channelHandlers);
         var req = LogoutRequest.builder().id(123L).build();
         var resp = LogoutResponse.builder().id(321L).build();
         doTestPipeline(channel, req);
@@ -117,14 +116,14 @@ public class EndecoderTest {
 
     @Test
     public void testMessageTransport() {
-        initialChannelWith(basicBuildHandlers(new Class<?>[] { MessageRequest.class, MessageResponse.class }));
+        initialChannelWith(channelHandlers);
         var req = MessageRequest.builder().id(123L).from("shuangshu").to("shushuang").time(System.currentTimeMillis())
-                .messageType(1).content("hello world").url("mimprotocol").property("").fromNick("shuangshu-nick")
+                .messageType(com.mdc.mim.common.dto.Message.ChatMessageType.TEXT).content("hello world")
+                .url("mimprotocol").property("").fromNick("shuangshu-nick")
                 .json("{\"hello\": \"good\" }").build();
         var resp = MessageResponse.builder().id(321L).code(2).info("good").expose(3).lastBlock(false).blockIndex(3)
                 .build();
         doTestPipeline(channel, req);
         doTestPipeline(channel, resp);
     }
-
 }

@@ -24,20 +24,25 @@ public class ClientTest {
     @Autowired
     NettyClient nettyClient;
 
+    User user;
+
     @BeforeAll
-    public static void initServer() {
+    public static void initServer() throws InterruptedException {
         nettyServer = new NettyServer(host, port);
-        new Thread(() -> {
+        var t1 = new Thread(() -> {
             nettyServer.start();
-        }).start();
+        });
+        t1.start();
         log.info("server started");
     }
 
     @BeforeEach
-    public void initUesr() {
-        var user = User.builder().uid("shuangshu-12345").devId("wsl-linux-dajfo").token("testToken")
+    public void initUesr() throws InterruptedException {
+        user = User.builder().uid("shuangshu-12345").devId("wsl-linux-dajfo").token("testToken")
                 .nickname("ShuangShu").build();
         nettyClient.setUser(user);
+        nettyClient.doConnect().sync();
+        Thread.sleep(500);
     }
 
     @Test
@@ -55,10 +60,20 @@ public class ClientTest {
 
     @Test
     public void testLogin() throws InterruptedException {
-        nettyClient.doConnect();
-        Thread.sleep(500);
-        // 测试登录功能
+        // 测试客户端登录功能
         nettyClient.doLogin();
         Thread.sleep(500);
+    }
+
+    /**
+     * 测试消息发送功能
+     * 
+     * @throws InterruptedException
+     */
+    @Test
+    public void testSending() throws InterruptedException {
+        nettyClient.doLogin().sync();
+        Thread.sleep(500);
+        nettyClient.doSend("test_uid_2", "test_content");
     }
 }

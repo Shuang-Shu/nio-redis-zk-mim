@@ -1,8 +1,11 @@
-package com.mdc.mim.endecoder;
+package com.mdc.mim.common;
 
 import java.util.function.Supplier;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.mdc.mim.common.dto.Message;
+import com.mdc.mim.common.dto.MessageTypeEnum;
+import com.mdc.mim.common.dto.ResponsesCodeEnum;
 import com.mdc.mim.common.dto.Message.KeepAliveRequest;
 import com.mdc.mim.common.dto.Message.KeepAliveResponse;
 import com.mdc.mim.common.dto.Message.LoginRequest;
@@ -22,9 +25,12 @@ public class Common {
     public static final int CONTENT_LENGTH = 4;
 
     private static final Class<?>[] messageClasses = {
-            LoginRequest.class, LoginResponse.class, LogoutRequest.class, LogoutResponse.class,
+            Message.class, Message.ChatMessageType.class, MessageTypeEnum.class,
+            LoginRequest.class, LoginResponse.class, LogoutRequest.class,
+            LogoutResponse.class,
             KeepAliveRequest.class, KeepAliveResponse.class,
-            MessageRequest.class, MessageResponse.class, MessageNotification.class, Platform.class
+            MessageRequest.class, MessageResponse.class, MessageNotification.class, Platform.class,
+            ResponsesCodeEnum.class
     };
 
     public static final Supplier<Kryo> supplier = () -> {

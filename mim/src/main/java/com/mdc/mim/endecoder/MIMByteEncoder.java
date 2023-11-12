@@ -1,5 +1,7 @@
 package com.mdc.mim.endecoder;
 
+import com.mdc.mim.common.Common;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;

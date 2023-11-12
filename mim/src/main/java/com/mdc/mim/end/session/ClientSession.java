@@ -37,6 +37,19 @@ public class ClientSession {
         this.channel.attr(SESSION_KEY).set(this);
     }
 
+    public void bindChannel() {
+        channel.attr(SESSION_KEY).set(this);
+    }
+
+    public ChannelFuture writeAndFlush(Object pojo) {
+        return channel.writeAndFlush(pojo);
+    }
+
+    public void writeAndClose(Object pojo) {
+        var cf = channel.writeAndFlush(pojo);
+        cf.addListener(ChannelFutureListener.CLOSE); // 添加关闭Listener
+    }
+
     public void loginSuccess(Message message) {
         this.sessionId = message.getSessionId(); // 获取sessionId
         this.hasLogined = true;

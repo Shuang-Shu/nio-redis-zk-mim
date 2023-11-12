@@ -3,8 +3,10 @@ package com.mdc.mim.end.server;
 import java.io.Closeable;
 import java.io.IOException;
 
-import com.mdc.mim.end.server.handler.LoginInboundHandler;
-import com.mdc.mim.endecoder.Common;
+import com.mdc.mim.common.Common;
+import com.mdc.mim.end.client.handler.ChatMessageHandler;
+import com.mdc.mim.end.server.handler.ChatMessageRequestHandler;
+import com.mdc.mim.end.server.handler.LoginRequestHandler;
 import com.mdc.mim.endecoder.KryoContentDecoder;
 import com.mdc.mim.endecoder.KryoContentEncoder;
 import com.mdc.mim.endecoder.MIMByteDecoder;
@@ -43,13 +45,16 @@ public class NettyServer implements Closeable {
             b.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
+                    // 解编码
                     // inbouund
                     ch.pipeline().addLast(new MIMByteDecoder());
                     ch.pipeline().addLast(new KryoContentDecoder(Common.supplier));
-                    ch.pipeline().addLast(new LoginInboundHandler());
                     // outbound
                     ch.pipeline().addLast(new MIMByteEncoder());
                     ch.pipeline().addLast(new KryoContentEncoder(Common.supplier));
+                    // handlers
+                    ch.pipeline().addLast(new LoginRequestHandler());
+                    ch.pipeline().addLast(new ChatMessageRequestHandler());
                 }
             });
             var channelFuture = b.bind(this.host, this.port).sync();
@@ -60,7 +65,6 @@ public class NettyServer implements Closeable {
             bossLoopGroup.shutdownGracefully();
             workerLoopGroup.shutdownGracefully();
         }
-
     }
 
     @Override

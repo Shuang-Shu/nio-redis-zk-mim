@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Message {
     MessageTypeEnum messageType; // 消息类型
     String sessionId;
@@ -26,6 +29,10 @@ public class Message {
     MessageResponse messageResponse;
     // 通知
     MessageNotification messageNotification;
+
+    public enum ChatMessageType {
+        TEXT, COMPLEX
+    }
 
     @Data
     @Builder
@@ -48,6 +55,7 @@ public class Message {
         long id;
         int code;
         String info;
+        String sessionId;
         int expose; // 存疑
     }
 
@@ -92,7 +100,7 @@ public class Message {
         String from;
         String to;
         long time;
-        int messageType;
+        Message.ChatMessageType messageType;
         String content;
         String url;
         String property;

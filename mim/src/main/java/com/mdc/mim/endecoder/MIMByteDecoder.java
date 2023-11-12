@@ -3,6 +3,7 @@ package com.mdc.mim.endecoder;
 import java.util.List;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.mdc.mim.common.Common;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

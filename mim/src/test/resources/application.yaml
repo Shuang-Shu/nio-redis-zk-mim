@@ -13,6 +13,11 @@ spring:
         maxWait: 2
         maxActive: 2
 
+# 日志设置
+logging:
+  level:
+    com.mdc.mim: debug
+
 server:
   host: localhost
   port: 8080

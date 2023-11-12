@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
+import com.mdc.mim.common.Common;
 import com.mdc.mim.common.utils.ClassIdUtils;
 
 import io.netty.channel.ChannelHandlerContext;

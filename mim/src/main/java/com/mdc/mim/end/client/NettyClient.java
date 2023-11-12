@@ -7,10 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.mdc.mim.common.Common;
 import com.mdc.mim.common.entity.User;
+import com.mdc.mim.end.client.handler.ExceptionHandler;
+import com.mdc.mim.end.client.handler.LoginResponesHandler;
+import com.mdc.mim.end.client.sender.ChatMessageSender;
 import com.mdc.mim.end.client.sender.LoginSender;
 import com.mdc.mim.end.session.ClientSession;
-import com.mdc.mim.endecoder.Common;
 import com.mdc.mim.endecoder.KryoContentDecoder;
 import com.mdc.mim.endecoder.KryoContentEncoder;
 import com.mdc.mim.endecoder.MIMByteDecoder;
@@ -47,6 +50,9 @@ public class NettyClient {
     @Autowired
     private LoginSender loginSender;
 
+    @Autowired
+    private ChatMessageSender chatMessageSender;
+
     private User user;
 
     // netty相关
@@ -79,12 +85,16 @@ public class NettyClient {
             // 创建会话
             clientSession = new ClientSession(channel, user);
             clientSession.setConnected(true);
+            // 为sender添加通道
+            this.loginSender.setClientSession(clientSession);
+            this.chatMessageSender.setClientSession(clientSession);
+            // 添加close listener
             channel.closeFuture().addListener(closeListener);
         }
 
     };
 
-    public void doConnect() {
+    public ChannelFuture doConnect() {
         if (user == null) {
             log.error("user is not set yet");
         }
@@ -102,30 +112,50 @@ public class NettyClient {
                     new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
+                            // 解编码
+                            // 入站
                             ch.pipeline().addLast("mimDecoder", new MIMByteDecoder());
                             ch.pipeline().addLast("kryoDecoder", new KryoContentDecoder(Common.supplier));
+                            // 出站
                             ch.pipeline().addLast("mimEncoder", new MIMByteEncoder());
                             ch.pipeline().addLast("kryoEncoder", new KryoContentEncoder(Common.supplier));
+                            // 业务处理
+                            ch.pipeline().addLast("loginReqHandler", new LoginResponesHandler());
+                            // 异常处理
+                            ch.pipeline().addLast("exceptionHandler", new ExceptionHandler());
                         }
                     });
 
             log.info("client connecting");
-
             var cf = b.connect();
             cf.addListener(connectedListener); // 添加连接监听器
+            return cf;
         } catch (Exception e) {
             log.info("connect failed!");
         }
+        return null;
     }
 
-    /*
-     * 发送登陆消息
+    /**
+     * 发送登录消息
      */
-    public void doLogin() {
+    public ChannelFuture doLogin() {
         if (clientSession == null || !clientSession.isConnected()) {
             log.error("connecting {}:{} failed", host, port);
         }
-        loginSender.setClientSession(clientSession);
-        loginSender.sendLogin(user);
+        return loginSender.sendLogin(user);
+    }
+
+    /**
+     * 发送消息到uid
+     * 
+     * @param toUid
+     * @param content
+     */
+    public ChannelFuture doSend(String toUid, String content) {
+        if (clientSession == null || !clientSession.isConnected()) {
+            log.error("connecting {}:{} failed", host, port);
+        }
+        return chatMessageSender.sendChatMessage(toUid, content);
     }
 }
